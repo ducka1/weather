@@ -3,8 +3,8 @@
 // http://api.openweathermap.org/geo/1.0/direct?q={city name},{state code},{country code}&limit={limit}&appid={API key}
 
 const API_KEY = '&appid=383a3b98025b5a113781a5a984a16b5c';
-const WEATHER_URL = 'http://api.openweathermap.org/data/2.5/weather';
-const COORD_URL = 'http://api.openweathermap.org/geo/1.0/direct'
+const WEATHER_URL = 'https://api.openweathermap.org/data/2.5/weather';
+const COORD_URL = 'https://api.openweathermap.org/geo/1.0/direct'
 
 function getCityData(city) {
     return parseCoords(constructCoords(city))
