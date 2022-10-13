@@ -9,6 +9,17 @@
     <script src="script.js" defer></script>
 </head>
 <body>
-    
+    <div id="background">
+        <div id="container">
+            <form onsubmit="return false">
+                <label for="search-input">Search city:</label>
+                <input type="text" name="search-input" id="search-input" required pattern="[a-zA-Z ]+">
+                <button type="submit" id="submit-input">Go</button>
+            </form>
+        </div>
+        <div id="data-container">
+
+        </div>
+    </div>
 </body>
 </html>
