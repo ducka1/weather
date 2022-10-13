@@ -37,35 +37,92 @@ async function parseWeather(URL) {
     try {
         const response = await fetch(URL, {mode: 'cors'});
         const weatherData = await response.json();
-
+        
+        const weatherGen = weatherData['weather'][0]['main'];
         const weatherDesc = weatherData['weather'][0]['description'];
-        const tempActual = weatherData['main']['temp']; // Kelvin
-        const tempFeels = weatherData['main']['feels_like']; // Kelvin
+        let tempActual = weatherData['main']['temp']; // Kelvin
+        let tempFeels = weatherData['main']['feels_like']; // Kelvin
         const humidity = weatherData['main']['humidity']; // %
         const pressure = weatherData['main']['pressure']; // hPa
-        const windSpeed = weatherData['wind']['speed']; // m/s
+        let windSpeed = weatherData['wind']['speed']; // m/s
         const country = weatherData['sys']['country']; // country code
-
-        return [weatherDesc, tempActual, tempFeels, humidity, pressure, windSpeed, country];
+        
+        tempActual = roundTo2Decimals(kelvinToCelsius(tempActual));
+        tempFeels = roundTo2Decimals(kelvinToCelsius(tempFeels));
+        windSpeed = roundTo2Decimals(windSpeed);
+        return [weatherGen, weatherDesc, tempActual, tempFeels, humidity, pressure, windSpeed, country];
     } catch (error) {
         console.log(`Error: ${error}`);
     }
 }
 
-function showToDom(stats) {
+function showToDom(stats, userInput) {
     const container = document.querySelector('#data-container');
     container.textContent = '';
-    for (let idx in stats) {
-        const para = document.createElement('p');
-        para.textContent = stats[idx];
-        container.appendChild(para);
+    let lines = [];
+
+    for (let i = 0; i < 6; i++) {
+        lines.push(document.createElement('h1'));
+    }
+
+    lines[0].textContent = `Weather in ${userInput}, ${stats[7]}`;
+    lines[1].textContent = `${stats[0]}: ${stats[1]}`;
+    lines[2].textContent = `Temperature: ${stats[2]}°C, feels like ${stats[3]}°C`;
+    lines[3].textContent = `Humidity: ${stats[4]}%`;
+    lines[4].textContent = `Pressure: ${stats[5]} hPa`;
+    lines[5].textContent = `Wind speed: ${stats[6]} m/s`;
+
+    lines[0].style.cssText = 'margin-bottom: 30px;'
+
+    for (let idx in lines) {
+        container.appendChild(lines[idx]);
     }
 }
 
+function setBackground(status) { 
+    const body = document.querySelector('body');
+    if (status == 'Clear') {
+        body.style.cssText = 'background-image: url(./images/clear.jpg); background-repeat: no-repeat; background-attachment: fixed; background-size: cover;'
+    }
+    else if (status == 'Clouds') {
+        body.style.cssText = 'background-image: url(./images/clouds.jpeg); background-repeat: no-repeat; background-attachment: fixed; background-size: cover;'
+    }
+    else if (status == 'Drizzle') {
+        body.style.cssText = 'background-image: url(./images/drizzle.jpg); background-repeat: no-repeat; background-attachment: fixed; background-size: cover;'
+    }
+    else if (status == 'Rain') {
+        body.style.cssText = 'background-image: url(./images/rain.jpg); background-repeat: no-repeat; background-attachment: fixed; background-size: cover;'
+    }
+    else if (status == 'Snow') {
+        body.style.cssText = 'background-image: url(./images/snow.jpg); background-repeat: no-repeat; background-attachment: fixed; background-size: cover;'
+    }
+    else if (status == 'Thunderstorm') {
+        body.style.cssText = 'background-image: url(./images/thunderstorm.jpg); background-repeat: no-repeat; background-attachment: fixed; background-size: cover;'
+    }
+}
+
+function roundTo2Decimals(n) {
+    return Math.round(n * 100) / 100;
+}
+
+function kelvinToCelsius(kelvinTemp) {
+    return celsiusTemp = kelvinTemp - 273.15;
+}
+
 addEventListener('submit', async (e) => {
-    const userInput = document.querySelector('#search-input').value;
-    const city = userInput.toLowerCase().replace(/\s/g, '');
-    const stats = await getCityData(city);
-    showToDom(stats);
+    const container = document.querySelector('#data-container');
+    try {
+        const userInput = document.querySelector('#search-input').value;
+        const city = userInput.toLowerCase();
+        const stats = await getCityData(city);
+        showToDom(stats, userInput);
+        setBackground(stats[0]);
+    } catch (error) {
+        console.log(`Error: ${error}`)
+        container.textContent = '';
+        const warning = document.createElement('h1');
+        warning.textContent = 'No such city found';
+        container.appendChild(warning);
+    }
 });
 
